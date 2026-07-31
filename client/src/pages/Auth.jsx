@@ -30,7 +30,7 @@ const Auth = () => {
     }
 
   return (
-    <div className='w-full min-h-screen bg-[#f3f3f3] flex items-center justify-center px-6 py-20'>
+    <div className='w-full min-h-screen bg-white flex items-center justify-center px-6 py-20'>
 
     {/* APPLY MOTION ON CONTAINER */}
       <motion.div

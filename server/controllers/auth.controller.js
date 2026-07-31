@@ -28,7 +28,7 @@ export const googleAuth = async (req, res) => {
             secure: false,
             maxAge: 7*24*60*60*1000
         })
-
+ 
         // return user data 
         return res.status(200).json(user);
     }

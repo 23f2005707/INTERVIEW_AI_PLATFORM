@@ -14,7 +14,11 @@
 
 -- 16. handle all routes in auth.routes.js and after doing this add middleware and cors policy in `index.js`
 
+-- 17. create middleware/isAuth.jsx for getting userId of current user
 
+-- 18. create user.controller.js for getting current user by userId
+
+-- 19. create routes of user and initialize in index.js 
 
 
 
@@ -29,3 +33,40 @@
 -- 12. setup autherntication from firebase and create utils/firebase.js
 -- 13. add function to firebase auth conset screen for login.
 
+--20. FETCH the current user in `App.jsx` (frontend) from backend by api call
+
+-- 21. install command -> `npm install @reduxjs/toolkit react-redux`
+
+-- 22. CREATE store and userSlice reducer by redux toolkit and by using dispatch store current user data in store. in `app.jsx` -> useselector to access data from store
+
+
+# FLOW DIAGRAM 
+Browser
+   |
+   | GET /api/user/current-user
+   ↓
+userRouter
+   |
+   ↓
+isAuth
+   |
+   | req.cookies.token
+   ↓
+jwt.verify()
+   |
+   | verifyToken.userId
+   ↓
+req.userId
+   |
+   ↓
+next()
+   |
+   ↓
+getCurrentUser
+   |
+   | await User.findById(req.userId)
+   ↓
+MongoDB
+   |
+   ↓
+User returned
