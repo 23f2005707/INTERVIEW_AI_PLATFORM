@@ -39,6 +39,9 @@
 
 -- 22. CREATE store and userSlice reducer by redux toolkit and by using dispatch store current user data in store. in `app.jsx` -> useselector to access data from store
 
+-- 23. create components/navbar.jsx to use of store and access data from redux by useselector and create ui.
+
+--24. create components/auth.jsx  and add the authModel in navbar.jsx and also add condition in buttons for check user is loggged in or not
 
 # FLOW DIAGRAM 
 Browser
