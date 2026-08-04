@@ -43,6 +43,10 @@
 
 --24. create components/auth.jsx  and add the authModel in navbar.jsx and also add condition in buttons for check user is loggged in or not
 
+--- 25. create ui for pages/home.jsx
+
+-- 26. create components/footer.jsx
+
 # FLOW DIAGRAM 
 Browser
    |
