@@ -8,6 +8,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors'
 import authRouter from './routes/auth.routes.js';
 import userRouter from './routes/user.routes.js';
+import interviewRouter from './routes/interview.routes.js';
 
 // app initialize
 const app = express()
@@ -28,6 +29,7 @@ app.use(cookieParser())  // cookie sahi format me store ho
 // routers 
 app.use("/api/auth", authRouter)
 app.use("/api/user", userRouter)
+app.use("/api/interview", interviewRouter)
 
 // get request 
 app.get('/', (req, res) => {

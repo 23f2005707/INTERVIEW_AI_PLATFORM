@@ -20,6 +20,21 @@
 
 -- 19. create routes of user and initialize in index.js 
 
+-- 28. create middlewares/multer.jsx
+
+-- 29. create services/openRouter.service.js -> 
+   -- `npm i axios`
+   -- require `API KEY`
+   -- create for getting message content by asking AI
+
+-- 30. create interview controller
+   -- `npm i pdfjs-dist` -> to read data from pdf
+   -- analyze the resume and get the text from pdf pages and get ai response by using pages text.
+
+
+-- 31. create interview routes 
+   -- add the router for pdf of interview
+model, routes
 
 
 
@@ -46,6 +61,9 @@
 --- 25. create ui for pages/home.jsx
 
 -- 26. create components/footer.jsx
+
+-- 27. create pages/interview project.jsx and report.jsx  || components/step1setUo, interview, report.jsx
+
 
 # FLOW DIAGRAM 
 Browser
