@@ -64,6 +64,12 @@ model, routes
 
 -- 27. create pages/interview project.jsx and report.jsx  || components/step1setUo, interview, report.jsx
 
+// --- 32. create file step1setup for analyze resume. 
+
+// -- 33. create interview.controller.js -> geneerateQuestion, submitanswer, finish interview
+
+// -- 34. create routes of all three controller in `inter.routes.js`
+
 
 # FLOW DIAGRAM 
 Browser
