@@ -36,6 +36,8 @@
    -- add the router for pdf of interview
 model, routes
 
+-- 35. create interview controller three routes -> generate-question, submit-answer, finish interview
+
 
 
 #### FRONTEND ####
@@ -70,6 +72,10 @@ model, routes
 
 // -- 34. create routes of all three controller in `inter.routes.js`
 
+// -36. create handleStart func in step1setup.jsx
+
+// -- 37. create `step2Interview.jsx` and `timer.jsx`
+
 
 # FLOW DIAGRAM 
 Browser
@@ -101,3 +107,6 @@ MongoDB
    |
    ↓
 User returned
+
+
+npm i react-circular-progressbar
