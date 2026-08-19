@@ -259,9 +259,9 @@ const Step1SetUp = ({ onStart }) => {
                       </p>
 
                       <ul className='list-disc list-inside text-gray-600 space-y-1'>
-                        {projects.map((p, i) => {
-                          <li key = {i} className='text-black'>{p}</li>
-                        })}
+                        {projects.map((p, i) => (
+                          <li key = {i} className='text-purple-400'>{p}</li>
+                        ))}
                       </ul>
                     </div>
                   )}

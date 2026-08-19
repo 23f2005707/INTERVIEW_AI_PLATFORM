@@ -83,16 +83,16 @@ export const analyzeResume = async (req, res) => {
         let cleanedResponse = aiResponse.trim();
 
         cleanedResponse = cleanedResponse
-                       .replace(/^```json\s*/i, "")
-                        .replace(/^```\s*/i, "")
-                        .replace(/\s*```$/i, "")
-                        .trim();
+            .replace(/^```json\s*/i, "")
+            .replace(/^```\s*/i, "")
+            .replace(/\s*```$/i, "")
+            .trim();
 
         let parsed;
 
-        try{
+        try {
             parsed = JSON.parse(cleanedResponse);
-        } catch(err) {
+        } catch (err) {
             console.error("AI returned invalid json:");
             console.error(aiResponse);
 
@@ -387,7 +387,7 @@ Answer: ${answer}
         /// ai response 
         const aiResponse = await askAI(messages)
 
-        const parsed = json.parse(aiResponse)
+        const parsed = JSON.parse(aiResponse)
 
         question.answer = answer;
         question.confidence = parsed.confidence;
@@ -403,7 +403,7 @@ Answer: ${answer}
 
 
     } catch (err) {
-        return res.status(500).json({ message: `failed to submit answer ${error}` })
+        return res.status(500).json({ message: `failed to submit answer ${err}` })
     }
 }
 
@@ -464,5 +464,66 @@ export const finishInterview = async (req, res) => {
     }
     catch (err) {
         return res.status(500).json({ message: `failed to finish interview` })
+    }
+}
+
+
+/// get MyInterviews
+export const getMyInterviews = async(req, res) => {
+    try{
+        const interviews = await Interview.find({userId: req.userId})
+        .sort({createdAt: -1})  // new interview on top
+        .select("role experience mode finalScore status createdAt")
+
+        return res.status(200).json(interviews)
+    }
+    catch(err) {
+        return res.status(500).json({message: `failed to find currentUser Interview ${err}`})
+    }
+}
+
+
+// get Single Interview Report
+export const getInterviewReport = async(req, res) => {
+    try{
+        // get id from frontend api by adding this-> /:id
+        const interview = await Interview.findById(req.params.id)
+
+        if(!interview) {
+            return res.status(404).json({message: "Interview not found"});
+        }
+
+        // structure of report
+        
+        let totalConfidence = 0;
+        let totalCommunication = 0;
+        let totalCorrectness = 0;
+
+        const totalQuestions = interview.questions.length;
+
+        interview.questions.forEach((q) => {  // forEach 
+            totalConfidence += q.confidence || 0;
+            totalCommunication += q.communication || 0;
+            totalCorrectness += q.correctness || 0;
+        });
+
+        const avgConfidence = totalQuestions ? totalConfidence / totalQuestions : 0;
+
+        const avgCommunication = totalQuestions ? totalCommunication / totalQuestions : 0;
+
+        const avgCorrectness = totalQuestions ? totalCorrectness / totalQuestions : 0;
+
+
+        // print score card of interview
+        return res.json({
+            interviewId: interview._id,
+            confidence: Number(avgConfidence.toFixed(1)),
+            communication: Number(avgCommunication.toFixed(1)),
+            correctness: Number(avgCommunication.toFixed(1)),
+            questionWiseScore: interview.questions
+        }) 
+    }
+    catch(err) {
+        return res.status(500).json({message: `failed to find currentUser Interview ${err}`})
     }
 }

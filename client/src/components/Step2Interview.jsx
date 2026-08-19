@@ -8,10 +8,12 @@ import { FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa'
 import { useState } from 'react'
 import { useRef } from 'react'
 import { useEffect } from 'react'
-import { start } from 'repl'
-import { BsArrowLeft } from 'react-icons/bs'
-import { current } from '@reduxjs/toolkit'
-import { finishInterview } from '../../../server/controllers/interview.controller'
+import { BsArrowLeft, BsArrowRight } from 'react-icons/bs'
+
+import axios from 'axios'
+import { ServerUrl } from '../App'
+
+
 
 
 const Step2Interview = ({ interviewData, onFinish }) => {
@@ -38,6 +40,7 @@ const Step2Interview = ({ interviewData, onFinish }) => {
   const videoRef = useRef(null);
 
   const currentQuestion = questions[currentIndex];
+
 
 
   // 3. load the voices 
@@ -197,7 +200,7 @@ const Step2Interview = ({ interviewData, onFinish }) => {
     if (isIntroPhase) return;
     if (!currentQuestion) return;
 
-    if(isSubmitting) return;  // 10.
+    // if(isSubmitting) return;
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {  // prevtime
@@ -212,7 +215,14 @@ const Step2Interview = ({ interviewData, onFinish }) => {
 
     return () => clearInterval(timer)
 
-  }, [isIntroPhase, currentIndex, timeLeft, isSubmitting])
+  }, [isIntroPhase, currentIndex, timeLeft])
+
+
+  useEffect(() => {
+    if(!isIntroPhase && currentQuestion) {
+      setTimeLeft(currentQuestion.timeLimit || 60);
+    }
+  }, [currentIndex]);
 
 
   // 8. handle speak recognition
@@ -298,6 +308,7 @@ const Step2Interview = ({ interviewData, onFinish }) => {
     setAnswer("");
     setFeedback("");
 
+    // all questions end
     if(currentIndex + 1 >= questions.length) {
       finishInterview();
       return;
@@ -306,6 +317,7 @@ const Step2Interview = ({ interviewData, onFinish }) => {
     await speakText("Alright, let's move to the next question.");
 
     setCurrentIndex(currentIndex + 1);
+
     setTimeout(() => {
       if(isMicOn) startMic();
     }, 500);
@@ -328,6 +340,30 @@ const Step2Interview = ({ interviewData, onFinish }) => {
         console.log(err)
       }
   }
+
+
+  // 12. if user not submit the answer
+  useEffect(() => {
+    if(isIntroPhase) return;
+    if(!currentQuestion) return;
+
+    if(timeLeft === 0 && !isSubmitting && !feedback) {
+      // handleNext();
+      submitAnswer()
+    }
+  }, [timeLeft]);
+
+
+  useEffect(() => {
+    return () => {
+      if(recognitionRef.current) {
+        recognitionRef.current.stop();
+        recognitionRef.current.abort();
+      }
+
+      window.speechSynthesis.cancel();
+    }
+  }, [])
 
 
   // 1.
@@ -439,15 +475,14 @@ const Step2Interview = ({ interviewData, onFinish }) => {
             </motion.button>
 
             <motion.button
-              onClick = {submitAnswer}
-              disabled = {isSubmitting}
+              onClick={submitAnswer}
+              disabled={isSubmitting}
               whileTap={{scale: 0.95}}
-              className= 'flex-1 bg-gradient-to-r from-emerald-600 to-teal-500 text-white py-3 sm:py-4 rounded-2xl shadow-lg hover:opacity-90 transition font-semibold disabled:bg-gray-500'>
+              className='flex-1 bg-gradient-to-r from-emerald-600 to-teal-500 text-white py-3 sm:py-4 rounded-2xl shadow-lg hover:opacity-90 transition font-semibold disabled:bg-gray-500'>
                  {isSubmitting ? "Submitting..." : "Submit Answer"}
-              Submit Answer
             </motion.button>
 
-          </div>):(
+          </div>):(  /**next button  */
             <motion.div 
               intial={{opacity: 0}}
               animate={{ opacity: 1 }}
@@ -457,7 +492,7 @@ const Step2Interview = ({ interviewData, onFinish }) => {
               <button
                 onClick = {handleNext}
                className='w-full bg-gradient-to-r from-emerald-600 to-teal-500 text-white py-3 rounded-xl shadow-md hover:opacity-90 transition flex items-center justify-center gap-1'>
-                Next Question <BsArrowLeft size = {18} />
+                Next Question <BsArrowRight size = {18} />
               </button>'
             </motion.div>
           )}

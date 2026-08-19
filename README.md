@@ -39,6 +39,11 @@ model, routes
 -- 35. create interview controller three routes -> generate-question, submit-answer, finish interview
 
 
+-- 38. create `getInterviews and getInterviewReport` in interview.controller.jsx.
+
+-- 39. create routes of both controller
+
+
 
 #### FRONTEND ####
 -- 7. initilaize frontend 
@@ -76,6 +81,17 @@ model, routes
 
 // -- 37. create `step2Interview.jsx` and `timer.jsx`
 
+// --40. create pages -> interviewPage and Report Page and Pricing Page.
+
+
+// -- 40. create `step3Report.jsx`
+
+// -- 41. create `interviewHistory.jsx` and `interviewReport`
+
+// -- 42. work on `step3Report.jsx`
+   ----- add chart from `react-recharts website`
+
+   ----- download pkg for pdf download -> `npm i jspdf jspdf-autotable`
 
 # FLOW DIAGRAM 
 Browser

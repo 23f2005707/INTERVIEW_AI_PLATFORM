@@ -31,6 +31,7 @@ app.use("/api/auth", authRouter)
 app.use("/api/user", userRouter)
 app.use("/api/interview", interviewRouter)
 
+
 // get request 
 app.get('/', (req, res) => {
     return res.json({message: "server started..."})
