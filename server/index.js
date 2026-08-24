@@ -15,11 +15,15 @@ import paymentRouter from './routes/payment.routes.js';
 const app = express()
 
 // conn b/w backad front + end
-app.use(cors({
-    origin: "http://localhost:5173",
-    "https://interview-ai-platform-client.onrender.com",
-    credentials: true
-}))  
+app.use(
+    cors({
+        origin: [
+            "http://localhost:5173",
+            "https://interview-ai-platform-client.onrender.com"
+        ],
+        credentials: true
+    })
+);
 
 const PORT = process.env.PORT || 6000
 
