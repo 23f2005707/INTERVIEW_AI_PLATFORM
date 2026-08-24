@@ -13,7 +13,7 @@ import InterviewPage from './pages/InterviewPage.jsx'
 import InterviewReport from './pages/InterviewReport.jsx'
 
 // serverURL 
-export const ServerUrl = "http://localhost:8000"
+export const ServerUrl = "https://interview-ai-platform-ft3f.onrender.com"
 
 const App = () => {
 
