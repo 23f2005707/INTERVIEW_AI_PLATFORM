@@ -16,7 +16,7 @@ const app = express()
 
 // conn b/w backad front + end
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: "https://interview-ai-platform-client.onrender.com/",
     credentials: true
 }))  
 
