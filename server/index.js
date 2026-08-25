@@ -11,6 +11,8 @@ import userRouter from './routes/user.routes.js';
 import interviewRouter from './routes/interview.routes.js';
 import paymentRouter from './routes/payment.routes.js';
 
+const app = express();
+
 // app initialize
 const allowedOrigins = [
     "http://localhost:5173",
