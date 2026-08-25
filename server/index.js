@@ -16,7 +16,7 @@ const app = express();
 // app initialize
 const allowedOrigins = [
     "http://localhost:5173",
-    "https://interview-ai-platform-client.onrender.com"
+    "https://interview-ai-platform-clients.onrender.com"
 ];
 
 app.use(cors({
