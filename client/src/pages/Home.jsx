@@ -40,7 +40,7 @@ const Home = () => {
   const navigate = useNavigate()
 
   return (
-    <div className='min-h-screen flex flex-col bg-[#f3f3f3]'>
+    <div className='min-h-screen flex flex-col'>
 
       <Navbar />
 

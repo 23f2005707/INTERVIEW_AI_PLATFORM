@@ -12,11 +12,13 @@ import interviewRouter from './routes/interview.routes.js';
 import paymentRouter from './routes/payment.routes.js';
 
 // app initialize
-const app = express()
+const allowedOrigins = [
+    "http://localhost:5173",
+    "https://interview-ai-platform-client.onrender.com"
+];
 
-// conn b/w backad front + end
 app.use(cors({
-    origin: "https://interview-ai-platform-client.onrender.com/",
+    origin: allowedOrigins,
     credentials: true
 }))  
 

@@ -10,7 +10,7 @@ const Timer = ({timeLeft, totalTime}) => {
     <div className='w-20 h-20'>
       <CircularProgressbar 
         value = {percentage}
-        text = {`${timeLeft}%`}
+        text = {`${timeLeft}s`}
         styles = {buildStyles({
             textSize: "28px",
             pathColor: "#10b981",

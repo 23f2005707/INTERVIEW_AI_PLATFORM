@@ -4,7 +4,7 @@ import maleVideo from '../assets/videos/male-ai.mp4'
 import femaleVideo from '../assets/videos/female-ai.mp4'
 import Timer from './Timer'
 import { motion } from "motion/react"
-import { FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa'
+import { FaMicrophone, FaMicrophoneSlash, FaVideo, FaVideoSlash } from 'react-icons/fa'
 import { useState } from 'react'
 import { useRef } from 'react'
 import { useEffect } from 'react'
@@ -25,7 +25,10 @@ const Step2Interview = ({ interviewData, onFinish }) => {
 
   const [isMicOn, setIsMicOn] = useState(true);
   const recognitionRef = useRef(null);
+  const recognitionRunningRef = useRef(false);
+  const wantsMicRef = useRef(true);
   const [isAIPlaying, setIsAIPlaying] = useState(0);
+  const isAIPlayingRef = useRef(false);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answer, setAnswer] = useState("");
@@ -37,8 +40,13 @@ const Step2Interview = ({ interviewData, onFinish }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [voiceGender, setVoiceGender] = useState("female");
   const [subtitle, setSubtitle] = useState("");
+  const [micError, setMicError] = useState("");
+  const [isCameraOn, setIsCameraOn] = useState(false);
+  const [cameraError, setCameraError] = useState("");
 
   const videoRef = useRef(null);
+  const cameraRef = useRef(null);
+  const cameraStreamRef = useRef(null);
 
   const currentQuestion = questions[currentIndex];
 
@@ -144,7 +152,7 @@ const Step2Interview = ({ interviewData, onFinish }) => {
 
 
         // 8. mic on
-        if(isMicOn) startMic();
+        if(wantsMicRef.current) startMic();
 
 
         setTimeout(() => {
@@ -189,7 +197,7 @@ const Step2Interview = ({ interviewData, onFinish }) => {
         await speakText(currentQuestion.question)
 
         // 8. mic on 
-        if(isMicOn) startMic();
+        if(wantsMicRef.current) startMic();
       }
     }
 
@@ -233,48 +241,131 @@ const Step2Interview = ({ interviewData, onFinish }) => {
     if (!("webkitSpeechRecognition" in window)) return;
 
     const recognition = new window.webkitSpeechRecognition();
-    recognition.lang = "en-us";
+    recognition.lang = "en-US";
     recognition.continuous = true;
-    recognition.interimResults = false;
+    recognition.interimResults = true;
 
-    // start recogn and handle transcript
     recognition.onresult = (event) => {
-      const transcript = event.results[event.results.length - 1][0].transcript;
+      let transcript = "";
+      for (let index = event.resultIndex; index < event.results.length; index += 1) {
+        if (event.results[index].isFinal) transcript += event.results[index][0].transcript;
+      }
 
-      setAnswer((prev) => prev + " " + transcript);
+      if (transcript.trim()) {
+        setAnswer((prev) => `${prev}${prev.trim() ? " " : ""}${transcript.trim()}`);
+      }
+    };
+
+    recognition.onstart = () => {
+      recognitionRunningRef.current = true;
+    };
+
+    recognition.onend = () => {
+      recognitionRunningRef.current = false;
+      if (wantsMicRef.current && !isAIPlayingRef.current) window.setTimeout(startMic, 150);
+    };
+
+    recognition.onerror = (event) => {
+      recognitionRunningRef.current = false;
+      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+        wantsMicRef.current = false;
+        setIsMicOn(false);
+        setMicError("Microphone access was blocked. Allow it in your browser and try again.");
+      }
     };
 
     recognitionRef.current = recognition;
 
   }, []);
 
+  useEffect(() => {
+    isAIPlayingRef.current = Boolean(isAIPlaying);
+  }, [isAIPlaying]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const startCamera = async () => {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        setCameraError("Webcam access is not supported by this browser.");
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        if (!isMounted) {
+          stream.getTracks().forEach((track) => track.stop());
+          return;
+        }
+        cameraStreamRef.current = stream;
+        setIsCameraOn(true);
+        if (cameraRef.current) cameraRef.current.srcObject = stream;
+      } catch {
+        setCameraError("Camera access was blocked. Allow camera access to use the interview preview.");
+      }
+    };
+
+    startCamera();
+    return () => {
+      isMounted = false;
+      cameraStreamRef.current?.getTracks().forEach((track) => track.stop());
+      cameraStreamRef.current = null;
+    };
+  }, []);
+
 
 /////////////////////  9. ///////////////////
   // start mic
   const startMic = () => {
-    if (recognitionRef.current && !isAIPlaying) {
+    if (recognitionRef.current && !isAIPlayingRef.current && !recognitionRunningRef.current) {
+      wantsMicRef.current = true;
+      setMicError("");
       try {
         recognitionRef.current.start();
-      } catch { }
+      } catch (error) {
+        if (error.name !== "InvalidStateError") setMicError("Unable to start the microphone.");
+      }
     }
   };
 
   // end mic
   const stopMic = () => {
     if (recognitionRef.current) {
-      recognitionRef.current.stop();
+      recognitionRunningRef.current = false;
+      try {
+        recognitionRef.current.stop();
+      } catch { }
     }
   }
 
   const toggleMic = () => {
     if(isMicOn) {
+      wantsMicRef.current = false;
       stopMic();
     }
     else {
+      wantsMicRef.current = true;
       startMic();
     }
 
     setIsMicOn(!isMicOn);
+  }
+
+  const toggleCamera = () => {
+    if (isCameraOn) {
+      cameraStreamRef.current?.getTracks().forEach((track) => track.stop());
+      cameraStreamRef.current = null;
+      setIsCameraOn(false);
+      return;
+    }
+
+    navigator.mediaDevices?.getUserMedia({ video: true }).then((stream) => {
+      cameraStreamRef.current = stream;
+      setIsCameraOn(true);
+      setCameraError("");
+      if (cameraRef.current) cameraRef.current.srcObject = stream;
+    }).catch(() => {
+      setCameraError("Camera access was blocked. Allow it in your browser and try again.");
+    });
   }
 
 
@@ -283,6 +374,7 @@ const Step2Interview = ({ interviewData, onFinish }) => {
     if(isSubmitting) {
       return;
     }
+    wantsMicRef.current = false;
     stopMic();
     setIsSubmitting(true);
 
@@ -323,12 +415,16 @@ const Step2Interview = ({ interviewData, onFinish }) => {
     setCurrentIndex(currentIndex + 1);
 
     setTimeout(() => {
-      if(isMicOn) startMic();
+      if(isMicOn) {
+        wantsMicRef.current = true;
+        startMic();
+      }
     }, 500);
   }
 
   // 11. finish interview
   const finishInterview = async(params) => {
+    wantsMicRef.current = false;
     stopMic()
     setIsMicOn(false)
 
@@ -344,6 +440,17 @@ const Step2Interview = ({ interviewData, onFinish }) => {
         console.log(err)
       }
   }
+
+  const handleBack = () => {
+    if (!window.confirm("Leave this interview? Your current progress will be lost.")) return;
+
+    wantsMicRef.current = false;
+    stopMic();
+    cameraStreamRef.current?.getTracks().forEach((track) => track.stop());
+    cameraStreamRef.current = null;
+    window.speechSynthesis.cancel();
+    navigate(-1);
+  };
 
 
   // 12. if user not submit the answer
@@ -388,6 +495,20 @@ const Step2Interview = ({ interviewData, onFinish }) => {
               className='w-full h-auto object-cover'
             />
           </div>
+
+          <div className='w-full max-w-md rounded-2xl overflow-hidden shadow-md border border-gray-200 bg-gray-900 relative'>
+            <video ref={cameraRef} autoPlay muted playsInline className='w-full aspect-video object-cover scale-x-[-1]' />
+            {!isCameraOn && <div className='absolute inset-0 flex items-center justify-center text-sm text-gray-300'>Camera preview off</div>}
+            <button
+              type='button'
+              onClick={toggleCamera}
+              aria-label={isCameraOn ? 'Turn camera off' : 'Turn camera on'}
+              title={isCameraOn ? 'Turn camera off' : 'Turn camera on'}
+              className='absolute bottom-3 right-3 w-10 h-10 rounded-full bg-black/75 text-white flex items-center justify-center hover:bg-black transition'>
+              {isCameraOn ? <FaVideo size={16} /> : <FaVideoSlash size={16} />}
+            </button>
+          </div>
+          {cameraError && <p className='w-full max-w-md text-xs text-amber-700'>{cameraError}</p>}
 
 
           {/* subtitle pending */}
@@ -450,9 +571,20 @@ const Step2Interview = ({ interviewData, onFinish }) => {
 
         {/* TEXT SECTION */}
         <div className='flex-1 flex flex-col p-4 sm:p-6 md:p-8 relative'>
-          <h2 className='text-xl sm:text-2xl font-bold text-emerald-600 mb-6'>
-            AI Smart Interview
-          </h2>
+          <div className='flex items-center justify-between gap-4 mb-6'>
+            <h2 className='text-xl sm:text-2xl font-bold text-emerald-600'>
+              AI Smart Interview
+            </h2>
+
+            <button
+              type='button'
+              onClick={handleBack}
+              className='inline-flex items-center gap-2 shrink-0 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 shadow-sm transition hover:border-emerald-300 hover:text-emerald-700'
+              aria-label='Go back from interview'>
+              <BsArrowLeft size={16} />
+              Back
+            </button>
+          </div>
 
           {currentQuestion && <div className='relative mb-6 bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-200 shadow-sm'>
             <p className='text-xs sm:text-sm text-gray-400 mb-2'>
@@ -477,6 +609,8 @@ const Step2Interview = ({ interviewData, onFinish }) => {
              className='w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-full bg-black text-white shadow-lg'>
               {isMicOn ? <FaMicrophone size={20} /> : <FaMicrophoneSlash size={20} />}
             </motion.button>
+
+            {micError && <p className='text-xs text-amber-700'>{micError}</p>}
 
             <motion.button
               onClick={submitAnswer}
